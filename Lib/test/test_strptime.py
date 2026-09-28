@@ -873,6 +873,21 @@ class CalculationTests(unittest.TestCase):
         check('2009 0 6', '%Y %W %w', 2009, 1, 3, 0, 0, 0, 5, 3)
         check('2009 1 7', '%G %V %u', 2009, 1, 4, 0, 0, 0, 6, 4)
 
+    def test_week_after_last_day(self):
+        # A week of the year and day of the week which fall after the last
+        # day of the year are normalized into the next year, just as week 0
+        # is normalized into the previous year.
+        def check(value, format, *expected):
+            self.assertEqual(_strptime._strptime_time(value, format)[:-1], expected)
+        check('2016 52 6', '%Y %W %w', 2016, 12, 31, 0, 0, 0, 5, 366)
+        check('2016 52 0', '%Y %W %w', 2017, 1, 1, 0, 0, 0, 6, 1)
+        check('2016 53 1', '%Y %W %w', 2017, 1, 2, 0, 0, 0, 0, 2)
+        check('2016 53 0', '%Y %W %w', 2017, 1, 8, 0, 0, 0, 6, 8)
+        check('2015 52 6', '%Y %U %w', 2016, 1, 2, 0, 0, 0, 5, 2)
+        check('2015 53 0', '%Y %U %w', 2016, 1, 3, 0, 0, 0, 6, 3)
+        check('2015 53 6', '%Y %U %w', 2016, 1, 9, 0, 0, 0, 5, 9)
+        check('2008 53 0', '%Y %W %w', 2009, 1, 11, 0, 0, 0, 6, 11)
+
 
 class CacheTests(unittest.TestCase):
     """Test that caching works properly."""

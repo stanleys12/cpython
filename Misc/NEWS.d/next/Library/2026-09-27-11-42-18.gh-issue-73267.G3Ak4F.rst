@@ -1,0 +1,3 @@
+:func:`time.strptime` now normalizes a week of the year (``%U`` or ``%W``) and
+a day of the week which fall after the last day of the year into the next
+year, instead of returning a ``tm_yday`` greater than the length of the year.
