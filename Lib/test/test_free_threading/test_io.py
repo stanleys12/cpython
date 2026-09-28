@@ -3,7 +3,7 @@ import io
 import _pyio as pyio
 import threading
 from unittest import TestCase
-from test.support import threading_helper
+from test.support import os_helper, threading_helper
 from test.support.threading_helper import run_concurrently
 from random import randint
 from sys import getsizeof
@@ -252,3 +252,35 @@ class TextIOWrapperTest(TestCase):
                 slot[0].detach()
 
         run_concurrently([reader, detacher])
+
+
+class FileIOTest(TestCase):
+    def setUp(self):
+        self.addCleanup(os_helper.unlink, os_helper.TESTFN)
+        with open(os_helper.TESTFN, "wb") as f:
+            f.write(b"0" * 4096)
+
+    def test_close_race(self):
+        # gh-158196: close() released the fstat() result cached at open
+        # time without synchronization, so two threads could both free it.
+        for _ in range(100):
+            f = io.FileIO(os_helper.TESTFN)
+            run_concurrently(f.close, nthreads=4)
+
+    def test_truncate_race(self):
+        for _ in range(100):
+            f = io.FileIO(os_helper.TESTFN, "r+")
+            run_concurrently(lambda: f.truncate(0), nthreads=4)
+            f.close()
+
+    def test_truncate_and_close_race(self):
+        for _ in range(100):
+            f = io.FileIO(os_helper.TESTFN, "r+")
+
+            def truncate():
+                try:
+                    f.truncate(0)
+                except ValueError:
+                    pass  # ignore truncate of an already closed file
+
+            run_concurrently([truncate, truncate, f.close, f.close])

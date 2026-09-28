@@ -7,6 +7,7 @@ preserve
 #  include "pycore_runtime.h"     // _Py_ID()
 #endif
 #include "pycore_abstract.h"      // _Py_convert_optional_to_ssize_t()
+#include "pycore_critical_section.h"// Py_BEGIN_CRITICAL_SECTION()
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
 PyDoc_STRVAR(_io_FileIO__dealloc_warn__doc__,
@@ -48,11 +49,18 @@ _io_FileIO_close_impl(fileio *self, PyTypeObject *cls);
 static PyObject *
 _io_FileIO_close(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
+    PyObject *return_value = NULL;
+
     if (nargs || (kwnames && PyTuple_GET_SIZE(kwnames))) {
         PyErr_SetString(PyExc_TypeError, "close() takes no arguments");
-        return NULL;
+        goto exit;
     }
-    return _io_FileIO_close_impl((fileio *)self, cls);
+    Py_BEGIN_CRITICAL_SECTION(self);
+    return_value = _io_FileIO_close_impl((fileio *)self, cls);
+    Py_END_CRITICAL_SECTION();
+
+exit:
+    return return_value;
 }
 
 PyDoc_STRVAR(_io_FileIO___init____doc__,
@@ -158,7 +166,9 @@ _io_FileIO___init__(PyObject *self, PyObject *args, PyObject *kwargs)
     }
     opener = fastargs[3];
 skip_optional_pos:
+    Py_BEGIN_CRITICAL_SECTION(self);
     return_value = _io_FileIO___init___impl((fileio *)self, nameobj, mode, closefd, opener);
+    Py_END_CRITICAL_SECTION();
 
 exit:
     return return_value;
@@ -298,11 +308,18 @@ _io_FileIO_readall_impl(fileio *self, PyTypeObject *cls);
 static PyObject *
 _io_FileIO_readall(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
+    PyObject *return_value = NULL;
+
     if (nargs || (kwnames && PyTuple_GET_SIZE(kwnames))) {
         PyErr_SetString(PyExc_TypeError, "readall() takes no arguments");
-        return NULL;
+        goto exit;
     }
-    return _io_FileIO_readall_impl((fileio *)self, cls);
+    Py_BEGIN_CRITICAL_SECTION(self);
+    return_value = _io_FileIO_readall_impl((fileio *)self, cls);
+    Py_END_CRITICAL_SECTION();
+
+exit:
+    return return_value;
 }
 
 PyDoc_STRVAR(_io_FileIO_read__doc__,
@@ -345,7 +362,9 @@ _io_FileIO_read(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py_ssi
         goto exit;
     }
 skip_optional:
+    Py_BEGIN_CRITICAL_SECTION(self);
     return_value = _io_FileIO_read_impl((fileio *)self, cls, size);
+    Py_END_CRITICAL_SECTION();
 
 exit:
     return return_value;
@@ -493,7 +512,9 @@ _io_FileIO_truncate(PyObject *self, PyTypeObject *cls, PyObject *const *args, Py
     }
     posobj = args[0];
 skip_optional:
+    Py_BEGIN_CRITICAL_SECTION(self);
     return_value = _io_FileIO_truncate_impl((fileio *)self, cls, posobj);
+    Py_END_CRITICAL_SECTION();
 
 exit:
     return return_value;
@@ -533,7 +554,13 @@ _io_FileIO__isatty_open_only_impl(fileio *self);
 static PyObject *
 _io_FileIO__isatty_open_only(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
-    return _io_FileIO__isatty_open_only_impl((fileio *)self);
+    PyObject *return_value = NULL;
+
+    Py_BEGIN_CRITICAL_SECTION(self);
+    return_value = _io_FileIO__isatty_open_only_impl((fileio *)self);
+    Py_END_CRITICAL_SECTION();
+
+    return return_value;
 }
 
 PyDoc_STRVAR(_io_FileIO_closed__doc__,
@@ -604,7 +631,9 @@ _io_FileIO__blksize_get(PyObject *self, void *Py_UNUSED(context))
     PyObject *return_value = NULL;
     long _return_value;
 
+    Py_BEGIN_CRITICAL_SECTION(self);
     _return_value = _io_FileIO__blksize_get_impl((fileio *)self);
+    Py_END_CRITICAL_SECTION();
     if ((_return_value == -1) && PyErr_Occurred()) {
         goto exit;
     }
@@ -625,4 +654,4 @@ exit:
 
 #define _IO_FILEIO__BLKSIZE_GETSETDEF {"_blksize", (getter)_io_FileIO__blksize_get, (setter)NULL, _io_FileIO__blksize__doc__},
 
-/*[clinic end generated code: output=6ad45da113899288 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=9bf9aeb234fde6fe input=a9049054013a1b77]*/

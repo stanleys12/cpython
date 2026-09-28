@@ -1,0 +1,5 @@
+Fix a double free of the :func:`~os.fstat` result cached by :class:`io.FileIO`
+in the :term:`free-threaded build`: two threads calling ``close()`` or
+``truncate()`` on the same object could both release it.  The methods that
+read or replace the cached result now run inside the object's critical
+section.

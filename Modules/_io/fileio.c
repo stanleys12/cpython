@@ -153,6 +153,7 @@ internal_close(fileio *self)
 }
 
 /*[clinic input]
+@critical_section
 _io.FileIO.close
 
     cls: defining_class
@@ -166,7 +167,7 @@ may be called more than once without error.
 
 static PyObject *
 _io_FileIO_close_impl(fileio *self, PyTypeObject *cls)
-/*[clinic end generated code: output=c30cbe9d1f23ca58 input=b405751dc4163da3]*/
+/*[clinic end generated code: output=c30cbe9d1f23ca58 input=6cfd0c726b5c44e6]*/
 {
     PyObject *res;
     int rc;
@@ -229,6 +230,7 @@ extern int _Py_open_cloexec_works;
 #endif
 
 /*[clinic input]
+@critical_section
 _io.FileIO.__init__
     file as nameobj: object
     mode: str = "r"
@@ -256,7 +258,7 @@ functionality similar to passing None).
 static int
 _io_FileIO___init___impl(fileio *self, PyObject *nameobj, const char *mode,
                          int closefd, PyObject *opener)
-/*[clinic end generated code: output=23413f68e6484bbd input=bac4efcd8f930bf3]*/
+/*[clinic end generated code: output=23413f68e6484bbd input=20b16a250a2f690e]*/
 {
 #ifdef MS_WINDOWS
     wchar_t *widename = NULL;
@@ -735,6 +737,7 @@ new_buffersize(fileio *self, size_t currentsize)
 }
 
 /*[clinic input]
+@critical_section
 _io.FileIO.readall
 
     cls: defining_class
@@ -753,7 +756,7 @@ are read) returns None.
 
 static PyObject *
 _io_FileIO_readall_impl(fileio *self, PyTypeObject *cls)
-/*[clinic end generated code: output=d546737ec895c462 input=65d05bd0169f2df5]*/
+/*[clinic end generated code: output=d546737ec895c462 input=8c1eb7d29286f2f2]*/
 {
     Py_off_t pos, end;
     PyBytesWriter *writer;
@@ -861,6 +864,7 @@ _io_FileIO_readall_impl(fileio *self, PyTypeObject *cls)
 }
 
 /*[clinic input]
+@critical_section
 _io.FileIO.read
     cls: defining_class
     size: Py_ssize_t(accept={int, NoneType}) = -1
@@ -880,7 +884,7 @@ an empty bytes object at EOF.
 
 static PyObject *
 _io_FileIO_read_impl(fileio *self, PyTypeObject *cls, Py_ssize_t size)
-/*[clinic end generated code: output=bbd749c7c224143e input=c7baa3b440af9337]*/
+/*[clinic end generated code: output=bbd749c7c224143e input=85832fe7b241bce8]*/
 {
     if (self->fd < 0)
         return err_closed();
@@ -1080,6 +1084,7 @@ _io_FileIO_tell_impl(fileio *self)
 
 #ifdef HAVE_FTRUNCATE
 /*[clinic input]
+@critical_section
 @permit_long_summary
 _io.FileIO.truncate
     cls: defining_class
@@ -1094,7 +1099,7 @@ The current file position is changed to the value of size.
 
 static PyObject *
 _io_FileIO_truncate_impl(fileio *self, PyTypeObject *cls, PyObject *posobj)
-/*[clinic end generated code: output=d936732a49e8d5a2 input=8f22152bcf900ed2]*/
+/*[clinic end generated code: output=d936732a49e8d5a2 input=fb5dbbe417bfcd4f]*/
 {
     Py_off_t pos;
     int ret;
@@ -1258,12 +1263,13 @@ _io_FileIO_isatty_impl(fileio *self)
    context TOCTOU issues (the fd could be arbitrarily modified by
    surrounding code). */
 /*[clinic input]
+@critical_section
 _io.FileIO._isatty_open_only
 [clinic start generated code]*/
 
 static PyObject *
 _io_FileIO__isatty_open_only_impl(fileio *self)
-/*[clinic end generated code: output=2b4689154d4b8b84 input=228767ff567cdfb6]*/
+/*[clinic end generated code: output=2b4689154d4b8b84 input=1c194cbfb3b1609c]*/
 {
     if (self->stat_atopen != NULL && !S_ISCHR(self->stat_atopen->st_mode)) {
         Py_RETURN_FALSE;
@@ -1338,6 +1344,7 @@ _io_FileIO_mode_get_impl(fileio *self)
 }
 
 /*[clinic input]
+@critical_section
 @getter
 _io.FileIO._blksize -> long
 
@@ -1346,7 +1353,7 @@ Stat st_blksize if available.
 
 static long
 _io_FileIO__blksize_get_impl(fileio *self)
-/*[clinic end generated code: output=e47eaf8cd6c0079f input=699d87d750798ccb]*/
+/*[clinic end generated code: output=e47eaf8cd6c0079f input=bc6e6216c01467ff]*/
 {
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
     if (self->stat_atopen != NULL && self->stat_atopen->st_blksize > 1) {
